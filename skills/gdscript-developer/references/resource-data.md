@@ -147,6 +147,57 @@ Use a **Resource** when data is authored at design time and shared across instan
 Use a **Dictionary** for transient runtime data you don't need to serialize or type-check.
 Use an **Autoload** for services or state that needs to be globally accessible and mutable at runtime.
 
+## Dictionary conventions
+
+Prefer typed Resources, arrays, or variables over Dictionaries whenever the data shape is known at design time. Dictionaries are untyped and give up static analysis, autocomplete, and `gdlint` checks — reach for them only when the structure genuinely varies at runtime (e.g., serialised save data, API responses, dynamic config loaded from JSON).
+
+When you do use a Dictionary, use an **enum as the key** rather than a plain string or integer. Enum keys are compile-time constants — typos become parse errors instead of silent bugs, and autocomplete works.
+
+### Pattern: enum key + typed value object
+
+When a dictionary maps an enum to a structured object, define all three pieces in order:
+
+```gdscript
+# 1. Enum — the set of valid keys
+enum Element { FIRE, WATER, EARTH, AIR }
+
+# 2. Value type — a class or inner class describing each entry's shape
+class ElementProperties:
+    var damage_multiplier: float
+    var status_effect: String
+    var color: Color
+
+    func _init(mult: float, effect: String, col: Color) -> void:
+        damage_multiplier = mult
+        status_effect = effect
+        color = col
+
+# 3. Dictionary — enum → value object
+var element_table: Dictionary = {
+    Element.FIRE:  ElementProperties.new(1.5, "burn",  Color.RED),
+    Element.WATER: ElementProperties.new(1.0, "wet",   Color.BLUE),
+    Element.EARTH: ElementProperties.new(0.8, "slow",  Color.GREEN),
+    Element.AIR:   ElementProperties.new(1.2, "none",  Color.WHITE),
+}
+```
+
+Usage:
+
+```gdscript
+func get_multiplier(element: Element) -> float:
+    return element_table[element].damage_multiplier
+```
+
+If the value object is simple enough to not warrant a class, a typed inner struct or a plain Resource also works — the key rule is that **the enum defines all valid keys** and **the value shape is consistent**.
+
+### When a Dictionary is still the right call
+
+- Runtime-dynamic keys (player-defined slot names, localisation keys from a file)
+- Serialisation intermediary (JSON round-trip)
+- Sparse mappings where most entries don't exist and checking `.has()` is intentional
+
+For anything else — especially configuration data — a custom Resource with `@export` fields is almost always cleaner.
+
 ## Loading Resources in code
 
 ```gdscript
