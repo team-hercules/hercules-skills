@@ -1,0 +1,4 @@
+interface:
+  display_name: "Build Planning Wiki"
+  short_description: "Create concise project planning wikis"
+  default_prompt: "Use $build-planning-wiki to create or update a project planning wiki for this project."
