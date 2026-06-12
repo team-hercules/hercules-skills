@@ -11,8 +11,6 @@ This skill provides functionalities for developing games using GDScript in the G
 
 ## Instructions
 
-### Step 0: Tasks to do regularly during the process
-
 ### Step 1: Understanding GDScript
 - Familiarize yourself with the syntax and features of GDScript, the scripting language used in the Godot Engine. This includes understanding variables, functions, classes, and the Godot API.
 - Read [syntax and features page](references/syntax-and-features.md) for a comprehensive overview of GDScript syntax and features.
@@ -42,8 +40,19 @@ This skill provides functionalities for developing games using GDScript in the G
 - **Integration with Godot Engine**: Seamlessly integrate with the Godot Engine to enhance the development workflow.
 
 ## Resources
-Read the frontematter of each reference for a brief overview and read the rest of the content for more details on each topic when relevant to the task at hand.
-- [best-practices](references/best-practices.md): Guidelines and best practices for writing clean and efficient GDScript code.
-- [signals](references/signals.md): Overview on godot signals how and when to use them.
-- [state-machine](references/state-machine.md): Overview on the state machine design pattern in godot - when to use and how
-- [syntax-and-features](references/syntax-and-features.md): Comprehensive overview of GDScript syntax and features.
+Read the frontmatter of each reference for a brief overview; read the body when you need detail on that topic.
+
+**Engine fundamentals**
+- [godot-architecture](references/godot-architecture.md): Nodes, scenes, resources, and the Node2D / Node3D / Control categories. Start here if unfamiliar with how Godot structures a game.
+- [syntax-and-features](references/syntax-and-features.md): Complete GDScript 4.x language reference — variables, types, functions, classes, annotations, signals, await, enums, operators.
+- [best-practices](references/best-practices.md): Static typing, node access, signals-over-references, performance tips, and linting setup.
+- [signals](references/signals.md): Declaring, emitting, connecting, disconnecting, one-shot/deferred, and await.
+
+**Design patterns**
+- [autoload-singleton](references/autoload-singleton.md): Global services that persist across scene changes — game state, event bus, audio manager, settings.
+- [resource-data](references/resource-data.md): Custom Resources as typed data containers (item stats, character configs, wave definitions). When to use vs Dictionary or Autoload.
+- [component-system](references/component-system.md): Composition via child node components (HealthComponent, HurtboxComponent) vs inheritance — when to use each.
+- [state-machine](references/state-machine.md): Enum-based and node-based state machine patterns, with full examples and a comparison guide.
+- [object-pooling](references/object-pooling.md): Pre-instantiate and reuse nodes to avoid per-frame instantiation cost. Profile before using.
+- [scene-management](references/scene-management.md): Scene switching, additive loading, background loading with a loading screen, transitions, and pause.
+- [save-system](references/save-system.md): Writing and loading save data (JSON and binary), the Persist group pattern, versioning, multiple slots, and encryption.
