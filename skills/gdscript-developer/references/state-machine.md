@@ -1,6 +1,6 @@
 ---
 name: state-machine
-description: GDScript 4.x state machine implementation guide — enum-based and node-based patterns, state transitions, enter/exit hooks, and when to use a state machine vs simpler conditionals. Load this when implementing character states (idle/run/jump/attack), AI behavior, or any system with discrete modes that transition based on events.
+description: Godot 4.x state machine implementation guide — enum-based and node-based patterns, state transitions, enter/exit hooks, and when to use a state machine vs simpler conditionals. Load this when implementing character states (idle/run/jump/attack), AI behavior, or any system with discrete modes that transition based on events.
 ---
 
 # State Machines in Godot 4.x
@@ -24,74 +24,80 @@ extends CharacterBody2D
 
 enum State { IDLE, RUN, JUMP, FALL, ATTACK }
 
+@export var speed: float = 200.0
+@export var jump_force: float = 400.0
+
 var current_state: State = State.IDLE
 
+@onready var anim: AnimationPlayer = $AnimationPlayer
+@onready var hitbox: CollisionShape2D = $Hitbox/CollisionShape2D
+
 func _physics_process(delta: float) -> void:
-    match current_state:
-        State.IDLE:
-            _state_idle(delta)
-        State.RUN:
-            _state_run(delta)
-        State.JUMP:
-            _state_jump(delta)
-        State.FALL:
-            _state_fall(delta)
-        State.ATTACK:
-            _state_attack(delta)
+	match current_state:
+		State.IDLE:
+			_state_idle(delta)
+		State.RUN:
+			_state_run(delta)
+		State.JUMP:
+			_state_jump(delta)
+		State.FALL:
+			_state_fall(delta)
+		State.ATTACK:
+			_state_attack(delta)
 
 func _transition(new_state: State) -> void:
-    if new_state == current_state:
-        return
-    _exit_state(current_state)
-    current_state = new_state
-    _enter_state(new_state)
+	if new_state == current_state:
+		return
+	_exit_state(current_state)
+	current_state = new_state
+	_enter_state(new_state)
 
 func _enter_state(state: State) -> void:
-    match state:
-        State.JUMP:
-            velocity.y = -jump_force
-            anim.play("jump")
-        State.RUN:
-            anim.play("run")
-        State.IDLE:
-            anim.play("idle")
+	match state:
+		State.JUMP:
+			velocity.y = -jump_force
+			anim.play("jump")
+		State.RUN:
+			anim.play("run")
+		State.IDLE:
+			anim.play("idle")
 
 func _exit_state(state: State) -> void:
-    match state:
-        State.ATTACK:
-            hitbox.disabled = true
+	match state:
+		State.ATTACK:
+			hitbox.disabled = true
 
 # --- per-state logic ---
 
 func _state_idle(delta: float) -> void:
-    if Input.is_action_pressed("move_right") or Input.is_action_pressed("move_left"):
-        _transition(State.RUN)
-    elif Input.is_action_just_pressed("jump") and is_on_floor():
-        _transition(State.JUMP)
+	if Input.is_action_pressed("move_right") or Input.is_action_pressed("move_left"):
+		_transition(State.RUN)
+	elif Input.is_action_just_pressed("jump") and is_on_floor():
+		_transition(State.JUMP)
 
 func _state_run(delta: float) -> void:
-    var dir := Input.get_axis("move_left", "move_right")
-    velocity.x = dir * speed
-    move_and_slide()
-    if dir == 0.0:
-        _transition(State.IDLE)
-    elif not is_on_floor():
-        _transition(State.FALL)
+	var dir := Input.get_axis("move_left", "move_right")
+	velocity.x = dir * speed
+	move_and_slide()
+	if dir == 0.0:
+		_transition(State.IDLE)
+	elif not is_on_floor():
+		_transition(State.FALL)
 
 func _state_jump(delta: float) -> void:
-    velocity += get_gravity() * delta
-    move_and_slide()
-    if velocity.y > 0:
-        _transition(State.FALL)
+	velocity += get_gravity() * delta
+	move_and_slide()
+	if velocity.y > 0:
+		_transition(State.FALL)
 
 func _state_fall(delta: float) -> void:
-    velocity += get_gravity() * delta
-    move_and_slide()
-    if is_on_floor():
-        _transition(State.IDLE)
+	velocity += get_gravity() * delta
+	move_and_slide()
+	if is_on_floor():
+		_transition(State.IDLE)
 
 func _state_attack(_delta: float) -> void:
-    pass  # handled by AnimationPlayer finish signal
+	pass  # handled by AnimationPlayer finish signal
 ```
 
 **Key pattern:** `_transition()` always calls `_exit_state` then `_enter_state`, so setup and teardown logic never gets skipped regardless of which state you're coming from.
@@ -121,23 +127,23 @@ extends Node
 var current_state: Node = null
 
 func _ready() -> void:
-    for child in get_children():
-        child.state_machine = self
-    transition(get_child(0))  # start in first state
+	for child in get_children():
+		child.state_machine = self
+	transition(get_child(0))  # start in first state
 
 func transition(new_state: Node) -> void:
-    if current_state:
-        current_state.exit()
-    current_state = new_state
-    current_state.enter()
+	if current_state:
+		current_state.exit()
+	current_state = new_state
+	current_state.enter()
 
 func _physics_process(delta: float) -> void:
-    if current_state:
-        current_state.physics_update(delta)
+	if current_state:
+		current_state.physics_update(delta)
 
 func _process(delta: float) -> void:
-    if current_state:
-        current_state.update(delta)
+	if current_state:
+		current_state.update(delta)
 ```
 
 **Base state script (extend this for each state):**
@@ -161,14 +167,14 @@ extends State
 @onready var player: Player = $"../.."
 
 func enter() -> void:
-    player.anim.play("idle")
-    player.velocity = Vector2.ZERO
+	player.anim.play("idle")
+	player.velocity = Vector2.ZERO
 
 func physics_update(_delta: float) -> void:
-    if Input.get_axis("move_left", "move_right") != 0.0:
-        state_machine.transition(state_machine.get_node("Run"))
-    elif Input.is_action_just_pressed("jump"):
-        state_machine.transition(state_machine.get_node("Jump"))
+	if Input.get_axis("move_left", "move_right") != 0.0:
+		state_machine.transition(state_machine.get_node("Run"))
+	elif Input.is_action_just_pressed("jump"):
+		state_machine.transition(state_machine.get_node("Jump"))
 ```
 
 ## Choosing between approaches
@@ -188,11 +194,11 @@ A common pattern is to let `AnimationPlayer` drive transitions when an animation
 
 ```gdscript
 func _ready() -> void:
-    anim.animation_finished.connect(_on_animation_finished)
+	anim.animation_finished.connect(_on_animation_finished)
 
 func _on_animation_finished(anim_name: StringName) -> void:
-    if anim_name == &"attack":
-        _transition(State.IDLE)
+	if anim_name == &"attack":
+		_transition(State.IDLE)
 ```
 
 Use `StringName` literals (`&"attack"`) for animation names — they're compared by identity and avoid string allocation every frame.

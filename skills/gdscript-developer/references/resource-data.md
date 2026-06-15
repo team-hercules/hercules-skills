@@ -44,9 +44,12 @@ extends Area2D
 
 @export var data: ItemData  # wire up in the Inspector
 
+@onready var label = $Label
+@onready var sprite = $Sprite2D
+
 func _ready() -> void:
-    $Label.text = data.display_name
-    $Sprite2D.texture = data.icon
+	label.text = data.display_name
+	sprite.texture = data.icon
 ```
 
 Every instance of `ItemPickup` references the same `ItemData` asset — changing the asset updates every pickup in the game instantly.
@@ -71,8 +74,8 @@ When you need per-instance data (e.g., a character's *current* health vs. its *b
 var _stats: CharacterStats  # instance-specific copy
 
 func _ready() -> void:
-    _stats = base_stats.duplicate(true)  # deep duplicate
-    _stats.current_health = _stats.max_health
+	_stats = base_stats.duplicate(true)  # deep duplicate
+	_stats.current_health = _stats.max_health
 ```
 
 `duplicate(true)` recursively duplicates sub-resources. Without `true`, nested resources are still shared.
@@ -163,21 +166,21 @@ enum Element { FIRE, WATER, EARTH, AIR }
 
 # 2. Value type — a class or inner class describing each entry's shape
 class ElementProperties:
-    var damage_multiplier: float
-    var status_effect: String
-    var color: Color
+	var damage_multiplier: float
+	var status_effect: String
+	var color: Color
 
-    func _init(mult: float, effect: String, col: Color) -> void:
-        damage_multiplier = mult
-        status_effect = effect
-        color = col
+	func _init(mult: float, effect: String, col: Color) -> void:
+		damage_multiplier = mult
+		status_effect = effect
+		color = col
 
 # 3. Dictionary — enum → value object
 var element_table: Dictionary = {
-    Element.FIRE:  ElementProperties.new(1.5, "burn",  Color.RED),
-    Element.WATER: ElementProperties.new(1.0, "wet",   Color.BLUE),
-    Element.EARTH: ElementProperties.new(0.8, "slow",  Color.GREEN),
-    Element.AIR:   ElementProperties.new(1.2, "none",  Color.WHITE),
+	Element.FIRE:  ElementProperties.new(1.5, "burn",  Color.RED),
+	Element.WATER: ElementProperties.new(1.0, "wet",   Color.BLUE),
+	Element.EARTH: ElementProperties.new(0.8, "slow",  Color.GREEN),
+	Element.AIR:   ElementProperties.new(1.2, "none",  Color.WHITE),
 }
 ```
 
@@ -185,7 +188,7 @@ Usage:
 
 ```gdscript
 func get_multiplier(element: Element) -> float:
-    return element_table[element].damage_multiplier
+	return element_table[element].damage_multiplier
 ```
 
 If the value object is simple enough to not warrant a class, a typed inner struct or a plain Resource also works — the key rule is that **the enum defines all valid keys** and **the value shape is consistent**.

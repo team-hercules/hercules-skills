@@ -24,10 +24,10 @@ signal health_changed(new_health: int)
 signal player_died
 
 func take_damage(amount: int) -> void:
-    health -= amount
-    health_changed.emit(health)
-    if health <= 0:
-        player_died.emit()
+	health -= amount
+	health_changed.emit(health)
+	if health <= 0:
+		player_died.emit()
 ```
 
 Signal parameters are typed in Godot 4. Emit passes values positionally to every connected callback.
@@ -40,13 +40,13 @@ extends Node
 @onready var button: Button = $Button
 
 func _ready() -> void:
-    if not button.pressed.is_connected(_on_button_pressed):
-        button.pressed.connect(_on_button_pressed)
+	if not button.pressed.is_connected(_on_button_pressed):
+		button.pressed.connect(_on_button_pressed)
 
 
 func _on_button_pressed() -> void:
-    # do something
-    pass
+	# do something
+	pass
 ```
 
 The guard (`if not … is_connected`) prevents double-connecting, which would fire the callback twice per emission.
@@ -73,12 +73,12 @@ some_signal.connect(_on_fired, CONNECT_DEFERRED)
 
 ```gdscript
 func _ready() -> void:
-    await get_tree().create_timer(1.0).timeout
-    print("one second later")
+	await get_tree().create_timer(1.0).timeout
+	print("one second later")
 
 func wait_for_value() -> void:
-    var new_health: int = await health_changed  # receives the emitted int
-    print(new_health)
+	var new_health: int = await health_changed  # receives the emitted int
+	print(new_health)
 ```
 
 `await` suspends the current function without blocking the engine. Any other signals, physics, or rendering continues normally.

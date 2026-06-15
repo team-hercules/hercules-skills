@@ -45,20 +45,20 @@ signal died
 @export var max_health: int = 100
 
 var current_health: int:
-    set(value):
-        current_health = clampi(value, 0, max_health)
-        health_changed.emit(current_health, max_health)
-        if current_health == 0:
-            died.emit()
+	set(value):
+		current_health = clampi(value, 0, max_health)
+		health_changed.emit(current_health, max_health)
+		if current_health == 0:
+			died.emit()
 
 func _ready() -> void:
-    current_health = max_health
+	current_health = max_health
 
 func take_damage(amount: int) -> void:
-    current_health -= amount
+	current_health -= amount
 
 func heal(amount: int) -> void:
-    current_health += amount
+	current_health += amount
 ```
 
 ```gdscript
@@ -69,8 +69,8 @@ extends Area2D
 signal hit(damage: int, hit_by: Node)
 
 func _on_area_entered(area: Area2D) -> void:
-    if area.has_method("get_damage"):
-        hit.emit(area.get_damage(), area)
+	if area.has_method("get_damage"):
+		hit.emit(area.get_damage(), area)
 ```
 
 ## Wiring components in the entity
@@ -87,21 +87,21 @@ extends CharacterBody2D
 @onready var anim: AnimationPlayer = $AnimationPlayer
 
 func _ready() -> void:
-    hurtbox.hit.connect(_on_hit)
-    health.died.connect(_on_died)
-    health.health_changed.connect(_on_health_changed)
+	hurtbox.hit.connect(_on_hit)
+	health.died.connect(_on_died)
+	health.health_changed.connect(_on_health_changed)
 
 func _on_hit(damage: int, _source: Node) -> void:
-    health.take_damage(damage)
+	health.take_damage(damage)
 
 func _on_health_changed(current: int, maximum: int) -> void:
-    # update health bar, flash sprite, etc.
-    pass
+	# update health bar, flash sprite, etc.
+	pass
 
 func _on_died() -> void:
-    anim.play("death")
-    await anim.animation_finished
-    queue_free()
+	anim.play("death")
+	await anim.animation_finished
+	queue_free()
 ```
 
 Because `HealthComponent` and `HurtboxComponent` know nothing about `Enemy`, you can drop the exact same components onto a `Destructible` crate:
@@ -114,8 +114,8 @@ extends StaticBody2D
 @onready var hurtbox: HurtboxComponent = $HurtboxComponent
 
 func _ready() -> void:
-    hurtbox.hit.connect(func(dmg, _src): health.take_damage(dmg))
-    health.died.connect(func(): queue_free())
+	hurtbox.hit.connect(func(dmg, _src): health.take_damage(dmg))
+	health.died.connect(func(): queue_free())
 ```
 
 ## Components vs Inheritance: decision guide

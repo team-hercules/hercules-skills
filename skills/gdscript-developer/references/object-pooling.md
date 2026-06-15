@@ -41,27 +41,27 @@ extends Node
 var _pool: Array[Bullet] = []
 
 func _ready() -> void:
-    for i in pool_size:
-        var bullet: Bullet = bullet_scene.instantiate()
-        add_child(bullet)
-        bullet.pool = self
-        bullet.deactivate()
-        _pool.append(bullet)
+	for i in pool_size:
+		var bullet: Bullet = bullet_scene.instantiate()
+		add_child(bullet)
+		bullet.pool = self
+		bullet.deactivate()
+		_pool.append(bullet)
 
 func get_bullet() -> Bullet:
-    for bullet in _pool:
-        if not bullet.visible:
-            return bullet
-    # Pool exhausted — grow it rather than fail silently
-    var bullet: Bullet = bullet_scene.instantiate()
-    add_child(bullet)
-    bullet.pool = self
-    bullet.deactivate()
-    _pool.append(bullet)
-    return bullet
+	for bullet in _pool:
+		if not bullet.visible:
+			return bullet
+	# Pool exhausted — grow it rather than fail silently
+	var bullet: Bullet = bullet_scene.instantiate()
+	add_child(bullet)
+	bullet.pool = self
+	bullet.deactivate()
+	_pool.append(bullet)
+	return bullet
 
 func return_bullet(bullet: Bullet) -> void:
-    bullet.deactivate()
+	bullet.deactivate()
 ```
 
 ```gdscript
@@ -73,21 +73,21 @@ var pool: BulletPool = null
 var velocity: Vector2 = Vector2.ZERO
 
 func activate(pos: Vector2, dir: Vector2, speed: float) -> void:
-    global_position = pos
-    velocity = dir.normalized() * speed
-    visible = true
-    set_process(true)
+	global_position = pos
+	velocity = dir.normalized() * speed
+	visible = true
+	set_process(true)
 
 func deactivate() -> void:
-    visible = false
-    set_process(false)
-    velocity = Vector2.ZERO
+	visible = false
+	set_process(false)
+	velocity = Vector2.ZERO
 
 func _process(delta: float) -> void:
-    global_position += velocity * delta
+	global_position += velocity * delta
 
 func _on_body_entered(_body: Node) -> void:
-    pool.return_bullet(self)
+	pool.return_bullet(self)
 ```
 
 ```gdscript
@@ -95,8 +95,8 @@ func _on_body_entered(_body: Node) -> void:
 @onready var bullet_pool: BulletPool = $BulletPool
 
 func fire(direction: Vector2) -> void:
-    var bullet = bullet_pool.get_bullet()
-    bullet.activate(muzzle.global_position, direction, 600.0)
+	var bullet = bullet_pool.get_bullet()
+	bullet.activate(muzzle.global_position, direction, 600.0)
 ```
 
 ## Resetting state
@@ -105,13 +105,13 @@ The most common pooling bug is forgetting to reset all state when deactivating. 
 
 ```gdscript
 func deactivate() -> void:
-    visible = false
-    set_process(false)
-    set_physics_process(false)
-    velocity = Vector2.ZERO
-    # Reset any signals or timers added at activate-time
-    for connection in body_entered.get_connections():
-        body_entered.disconnect(connection["callable"])
+	visible = false
+	set_process(false)
+	set_physics_process(false)
+	velocity = Vector2.ZERO
+	# Reset any signals or timers added at activate-time
+	for connection in body_entered.get_connections():
+		body_entered.disconnect(connection["callable"])
 ```
 
 ## Pool sizing
@@ -126,14 +126,14 @@ For very simple cases, you can skip a separate pool class and just scan children
 
 ```gdscript
 func _get_inactive_bullet() -> Bullet:
-    for child in get_children():
-        if not child.visible:
-            return child as Bullet
-    return null  # caller handles nil case
+	for child in get_children():
+		if not child.visible:
+			return child as Bullet
+	return null  # caller handles nil case
 ```
 
 This is fine for small pools (≤ 20 objects). For larger pools, the linear scan itself becomes a bottleneck — use an explicit free-list array instead.
 
 ## Pooling in an Autoload
 
-If multiple scenes need the same pool, move it to an Autoload (see `references/autoload-singleton.md`) so bullets survive scene transitions and the pool is accessible globally.
+If multiple scenes need the same pool, move it to an Autoload (see [autoload-singleton.md](autoload-singleton.md)) so bullets survive scene transitions and the pool is accessible globally.

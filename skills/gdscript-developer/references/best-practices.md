@@ -15,7 +15,7 @@ Always prefer typed code. Types catch bugs at edit time, enable autocomplete, an
 # Preferred
 var speed: float = 200.0
 func heal(amount: int) -> void:
-    _health = min(_health + amount, MAX_HEALTH)
+	_health = min(_health + amount, MAX_HEALTH)
 
 # Use := when the type is obvious from the right-hand side
 var direction := Vector2.RIGHT
@@ -49,27 +49,27 @@ Prefer signals for one-to-many notification and for decoupling child nodes from 
 signal health_changed(new_health: int)
 
 func take_damage(amount: int) -> void:
-    health -= amount
-    health_changed.emit(health)
+	health -= amount
+	health_changed.emit(health)
 ```
 
 Connect in the parent or scene root, not in the emitting node:
 ```gdscript
 # player.gd
 func _ready() -> void:
-    health_component.health_changed.connect(_on_health_changed)
+	health_component.health_changed.connect(_on_health_changed)
 
 func _on_health_changed(new_health: int) -> void:
-    hud.update_health(new_health)
+	hud.update_health(new_health)
 ```
 
 Always guard connections to avoid double-connecting:
 ```gdscript
 if not button.pressed.is_connected(_on_button_pressed):
-    button.pressed.connect(_on_button_pressed)
+	button.pressed.connect(_on_button_pressed)
 ```
 
-See `references/signals.md` for full signal syntax.
+See [signals.md](signals.md) for full signal syntax.
 
 ## Script Size and Responsibility
 
@@ -114,11 +114,52 @@ For production paths, use early returns and emit signals rather than crashing:
 
 ```gdscript
 func take_damage(amount: int) -> void:
-    if amount <= 0:
-        return
-    _health -= amount
-    health_changed.emit(_health)
+	if amount <= 0:
+		return
+	_health -= amount
+	health_changed.emit(_health)
 ```
+
+## Naming Variables
+
+Use full, descriptive names. Short names hide intent and force the reader to guess.
+
+```gdscript
+# Bad — what is "dir"? a directory? a direction enum? a Vector2?
+var dir := Vector2.RIGHT
+var t := Tile.new()
+var weighted: Dictionary[int, float] = {}
+
+# Good
+var movement_direction := Vector2.RIGHT
+var tile := Tile.new()
+var tile_weights: Dictionary[int, float] = {}
+```
+
+Common offenders to avoid:
+
+| Shortcut | Use instead |
+|---|---|
+| `dir` | `direction`, `directory` (whichever applies) |
+| `t`, `n`, `i` (outside loops) | the type or role: `tile`, `node`, `index` |
+| `pos` | `position` |
+| `vel` | `velocity` |
+| `rot` | `rotation` |
+| `btn` | `button` |
+| `mgr` | `manager` |
+
+For typed dictionaries, name both sides of the mapping so it's clear what maps to what:
+
+```gdscript
+# Bad — what is "weighted"?
+var weighted: Dictionary[StringName, float] = {}
+
+# Good
+var action_weights: Dictionary[StringName, float] = {}
+var tile_spawn_weights: Dictionary[int, float] = {}
+```
+
+Loop variables are the one exception — `i`, `j` specifically are fine for tight index loops when the intent is obvious from context. (if there is a need for 3 or more index variables inside loops - like triple nested loops, there is some bad design going on)
 
 ## Linting
 
@@ -140,4 +181,6 @@ gdlint path/to/your/script.gd
 gdlint **/*.gd
 ```
 
-The default config enforces the conventions described in this file: snake_case variables/functions, PascalCase classes/enums, CONSTANT_CASE constants, past-tense signals, max 100-character lines, tabs for indentation, and the script code order from the "Script Code Order" section above. When in doubt about a specific rule, read the `.gdlintrc` in the project — the key names map directly to what `gdlint` checks.
+The default config enforces snake_case for variables/functions/signals, PascalCase for classes/enums, CONSTANT_CASE for constants, max 100-character lines, tab indentation, and the order of class members (the `class-definitions-order` key). When in doubt about a specific rule, read the `.gdlintrc` in the project — the key names map directly to what `gdlint` checks.
+
+Two conventions the linter cannot verify, so keep them in mind while writing: name signals in past tense (`door_opened`, not `open_door`), and prefix private members with `_`.

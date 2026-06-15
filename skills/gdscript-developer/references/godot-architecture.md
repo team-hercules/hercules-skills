@@ -83,16 +83,16 @@ A scene is a saved tree of nodes stored as a `.tscn` file. Think of it as a reus
 var bullet_scene: PackedScene = preload("res://entities/bullet.tscn")
 
 func _on_fire_pressed() -> void:
-    var bullet = bullet_scene.instantiate()
-    bullet.global_position = muzzle.global_position
-    get_parent().add_child(bullet)
+	var bullet = bullet_scene.instantiate()
+	bullet.global_position = muzzle.global_position
+	get_parent().add_child(bullet)
 ```
 
 ### Composition over deep inheritance
 
 Godot encourages you to build complex objects by **composing scenes**, not by creating deep class hierarchies. An Enemy is not a subclass of Character — it's a scene that contains a `CharacterBody2D`, a `HealthComponent` scene, a `HurtboxComponent` scene, and so on. Each component is its own scene with its own script and signals.
 
-This keeps individual scripts small and lets you reuse components (health, hitbox, AI) across many different enemy types without code duplication.
+This keeps individual scripts small and lets you reuse components (health, hitbox, AI) across many different enemy types without code duplication. See [component-system.md](component-system.md) for the full pattern with code.
 
 ### Scene inheritance
 
@@ -153,7 +153,7 @@ extends Resource
 @export var drop_table: Array[ItemData] = []
 ```
 
-Save as a `.tres` file in the editor, wire it into a node's `@export var data: EnemyData`, and all enemies of that type share the same configuration asset. Changing the `.tres` updates every instance instantly.
+Save as a `.tres` file in the editor, wire it into a node's `@export var data: EnemyData`, and all enemies of that type share the same configuration asset. Changing the `.tres` updates every instance instantly. For the full pattern — sharing vs duplicating, dictionary conventions, when to prefer a Resource over a Dictionary — see [resource-data.md](resource-data.md).
 
 ---
 
@@ -205,8 +205,8 @@ The base for all 2D game objects. Adds `position`, `rotation`, `scale`, and `z_i
 extends Node2D
 
 func _process(delta: float) -> void:
-    position.x += 100.0 * delta   # move right in local space
-    rotation += 0.5 * delta       # rotate (radians)
+	position.x += 100.0 * delta   # move right in local space
+	rotation += 0.5 * delta       # rotate (radians)
 ```
 
 Use `CharacterBody2D` for player/enemy movement with `move_and_slide()`. Use `Area2D` for trigger zones (hitboxes, collectibles). Use `RigidBody2D` when you want the physics engine to drive motion (crates, projectiles).
@@ -219,8 +219,8 @@ The base for all 3D game objects. Adds a `Transform3D` that encodes position, ro
 extends Node3D
 
 func _process(delta: float) -> void:
-    position += transform.basis.z * speed * delta  # move forward
-    rotate_y(turn_speed * delta)
+	position += transform.basis.z * speed * delta  # move forward
+	rotate_y(turn_speed * delta)
 ```
 
 Use `CharacterBody3D` + `move_and_slide()` for 3D characters. Use `MeshInstance3D` to render a mesh. Use `Camera3D` to define what the player sees.
@@ -233,13 +233,13 @@ The base for all UI elements. Unlike Node2D/Node3D which position by transform, 
 extends Control
 
 func _ready() -> void:
-    # anchors define which corner/edge of the parent to attach to
-    anchor_right = 1.0   # stretch to fill parent width
-    anchor_bottom = 1.0
+	# anchors define which corner/edge of the parent to attach to
+	anchor_right = 1.0   # stretch to fill parent width
+	anchor_bottom = 1.0
 
 func _gui_input(event: InputEvent) -> void:
-    if event is InputEventMouseButton:
-        print("clicked")
+	if event is InputEventMouseButton:
+		print("clicked")
 ```
 
 Container nodes (`VBoxContainer`, `HBoxContainer`, `GridContainer`) automatically arrange their Control children — use them instead of positioning children manually. `Theme` resources control fonts, colors, and styles across an entire UI tree from a single asset.

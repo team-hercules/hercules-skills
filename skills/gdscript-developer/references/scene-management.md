@@ -28,11 +28,11 @@ Add a scene on top of the current one without replacing it. Useful for HUDs, pau
 var hud_scene: PackedScene = preload("res://ui/hud.tscn")
 
 func show_hud() -> void:
-    var hud = hud_scene.instantiate()
-    get_tree().root.add_child(hud)
+	var hud = hud_scene.instantiate()
+	get_tree().root.add_child(hud)
 
 func hide_hud(hud: Node) -> void:
-    hud.queue_free()
+	hud.queue_free()
 ```
 
 ## Background loading with a loading screen
@@ -47,28 +47,28 @@ var _load_path: String = ""
 var _progress: Array = []  # passed by reference to get_status
 
 func start_loading(scene_path: String) -> void:
-    _load_path = scene_path
-    ResourceLoader.load_threaded_request(scene_path)
-    set_process(true)
+	_load_path = scene_path
+	ResourceLoader.load_threaded_request(scene_path)
+	set_process(true)
 
 func _process(_delta: float) -> void:
-    var status = ResourceLoader.load_threaded_get_status(_load_path, _progress)
+	var status = ResourceLoader.load_threaded_get_status(_load_path, _progress)
 
-    match status:
-        ResourceLoader.THREAD_LOAD_IN_PROGRESS:
-            $ProgressBar.value = _progress[0] * 100.0
+	match status:
+		ResourceLoader.THREAD_LOAD_IN_PROGRESS:
+			$ProgressBar.value = _progress[0] * 100.0
 
-        ResourceLoader.THREAD_LOAD_LOADED:
-            set_process(false)
-            var packed: PackedScene = ResourceLoader.load_threaded_get(_load_path)
-            get_tree().change_scene_to_packed(packed)
+		ResourceLoader.THREAD_LOAD_LOADED:
+			set_process(false)
+			var packed: PackedScene = ResourceLoader.load_threaded_get(_load_path)
+			get_tree().change_scene_to_packed(packed)
 
-        ResourceLoader.THREAD_LOAD_FAILED:
-            push_error("Failed to load scene: " + _load_path)
-            set_process(false)
+		ResourceLoader.THREAD_LOAD_FAILED:
+			push_error("Failed to load scene: " + _load_path)
+			set_process(false)
 ```
 
-Trigger the loading screen from any scene via an Autoload (see `references/autoload-singleton.md`):
+Trigger the loading screen from any scene via an Autoload (see [autoload-singleton.md](autoload-singleton.md)):
 
 ```gdscript
 # scene_manager.gd (Autoload)
@@ -77,9 +77,9 @@ extends Node
 const LOADING_SCREEN = preload("res://ui/loading_screen.tscn")
 
 func load_scene(path: String) -> void:
-    var screen = LOADING_SCREEN.instantiate()
-    get_tree().root.add_child(screen)
-    screen.start_loading(path)
+	var screen = LOADING_SCREEN.instantiate()
+	get_tree().root.add_child(screen)
+	screen.start_loading(path)
 ```
 
 ```gdscript
@@ -96,34 +96,34 @@ Fade to black before switching, then fade back in. Use a full-screen `ColorRect`
 @onready var fade_rect: ColorRect = $FadeRect
 
 func transition_to(path: String) -> void:
-    # Fade out
-    var tween = create_tween()
-    tween.tween_property(fade_rect, "modulate:a", 1.0, 0.3)
-    await tween.finished
+	# Fade out
+	var tween = create_tween()
+	tween.tween_property(fade_rect, "modulate:a", 1.0, 0.3)
+	await tween.finished
 
-    get_tree().change_scene_to_file(path)
+	get_tree().change_scene_to_file(path)
 
-    # Fade in after scene is ready
-    await get_tree().process_frame
-    tween = create_tween()
-    tween.tween_property(fade_rect, "modulate:a", 0.0, 0.3)
+	# Fade in after scene is ready
+	await get_tree().process_frame
+	tween = create_tween()
+	tween.tween_property(fade_rect, "modulate:a", 0.0, 0.3)
 ```
 
 ## Persisting data across scene changes
 
-`change_scene_to_*` frees the old scene. Anything you need to carry across — player stats, inventory, settings — must live in an Autoload (see `references/autoload-singleton.md`) or be saved to disk (see `references/save-system.md`).
+`change_scene_to_*` frees the old scene. Anything you need to carry across — player stats, inventory, settings — must live in an Autoload (see [autoload-singleton.md](autoload-singleton.md)) or be saved to disk (see [save-system.md](save-system.md)).
 
 ## Scene lifetime and memory
 
 Scenes loaded with `preload()` are kept in memory for the duration of the script that holds them. If you preload a large scene in a script that stays alive, that scene stays in memory.
 
-To release a preloaded resource, set the variable to `null`:
+Resources are reference-counted (there is no garbage collector) — a resource is freed the moment the last reference to it disappears. To release a preloaded resource, drop the reference:
 
 ```gdscript
 var _cached_scene: PackedScene = preload("res://levels/big_level.tscn")
 
 func unload() -> void:
-    _cached_scene = null  # reference dropped; GC can collect it
+	_cached_scene = null  # reference dropped; freed once nothing else references it
 ```
 
 For runtime-loaded resources, Godot's resource cache may keep them alive. Call `ResourceLoader.load()` with `cache_mode = ResourceLoader.CACHE_MODE_IGNORE` if you don't want caching:
@@ -148,5 +148,5 @@ Nodes that should keep running while paused (e.g., the pause menu itself) need `
 
 ```gdscript
 func _ready() -> void:
-    process_mode = Node.PROCESS_MODE_ALWAYS
+	process_mode = Node.PROCESS_MODE_ALWAYS
 ```

@@ -38,31 +38,24 @@ extends Node
 signal score_changed(new_score: int)
 
 var score: int = 0:
-    set(value):
-        score = value
-        score_changed.emit(score)
+	set(value):
+		score = value
+		score_changed.emit(score)
 
 var current_level: int = 1
 var lives: int = 3
 
 func reset() -> void:
-    score = 0
-    current_level = 1
-    lives = 3
+	score = 0
+	current_level = 1
+	lives = 3
 ```
 
 ## Common use cases
 
 ### Global game state
 
-Anything that must survive a scene change — score, lives, current level, player inventory, settings.
-
-```gdscript
-# game_state.gd
-extends Node
-var score: int = 0
-var player_health: int = 100
-```
+Anything that must survive a scene change — score, lives, current level, player inventory. The `GameState` example above is the canonical shape.
 
 ### Event bus
 
@@ -83,10 +76,10 @@ EventBus.enemy_killed.emit("goblin", global_position)
 
 # listener (hud.gd)
 func _ready() -> void:
-    EventBus.enemy_killed.connect(_on_enemy_killed)
+	EventBus.enemy_killed.connect(_on_enemy_killed)
 
 func _on_enemy_killed(enemy_type: String, _pos: Vector2) -> void:
-    kill_count += 1
+	kill_count += 1
 ```
 
 ### Audio manager
@@ -101,20 +94,20 @@ extends Node
 @onready var music_player: AudioStreamPlayer = $MusicPlayer
 
 var sfx_library: Dictionary = {
-    "hit": preload("res://audio/hit.ogg"),
-    "jump": preload("res://audio/jump.ogg"),
+	"hit": preload("res://audio/hit.ogg"),
+	"jump": preload("res://audio/jump.ogg"),
 }
 
 func play_sfx(key: String) -> void:
-    if sfx_library.has(key):
-        sfx_player.stream = sfx_library[key]
-        sfx_player.play()
+	if sfx_library.has(key):
+		sfx_player.stream = sfx_library[key]
+		sfx_player.play()
 
 func play_music(stream: AudioStream) -> void:
-    if music_player.stream == stream:
-        return
-    music_player.stream = stream
-    music_player.play()
+	if music_player.stream == stream:
+		return
+	music_player.stream = stream
+	music_player.play()
 ```
 
 ### Settings / config
@@ -129,17 +122,17 @@ var master_volume: float = 1.0
 var fullscreen: bool = false
 
 func save() -> void:
-    var cfg = ConfigFile.new()
-    cfg.set_value("audio", "master_volume", master_volume)
-    cfg.set_value("display", "fullscreen", fullscreen)
-    cfg.save(SAVE_PATH)
+	var cfg = ConfigFile.new()
+	cfg.set_value("audio", "master_volume", master_volume)
+	cfg.set_value("display", "fullscreen", fullscreen)
+	cfg.save(SAVE_PATH)
 
 func load_settings() -> void:
-    var cfg = ConfigFile.new()
-    if cfg.load(SAVE_PATH) != OK:
-        return
-    master_volume = cfg.get_value("audio", "master_volume", 1.0)
-    fullscreen = cfg.get_value("display", "fullscreen", false)
+	var cfg = ConfigFile.new()
+	if cfg.load(SAVE_PATH) != OK:
+		return
+	master_volume = cfg.get_value("audio", "master_volume", 1.0)
+	fullscreen = cfg.get_value("display", "fullscreen", false)
 ```
 
 ## Pitfalls
@@ -150,10 +143,10 @@ func load_settings() -> void:
 
 ```gdscript
 func goto_scene(path: String) -> void:
-    _do_goto.call_deferred(path)
+	_do_goto.call_deferred(path)
 
 func _do_goto(path: String) -> void:
-    get_tree().change_scene_to_file(path)
+	get_tree().change_scene_to_file(path)
 ```
 
 **Don't overload Autoloads with unrelated state.** One bloated `Global.gd` becomes a maintenance nightmare. Split by responsibility: `GameState`, `AudioManager`, `EventBus`, `Settings`.
